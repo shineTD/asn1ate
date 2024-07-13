@@ -32,6 +32,8 @@ import sys
 import argparse
 import keyword
 import contextlib
+
+import chardet
 from asn1ate import parser, __version__
 from asn1ate.support import pygen
 from asn1ate.sema import *
@@ -645,9 +647,15 @@ def _maybe_open(filename):
         fileobj.close()
 
 
+def get_file_encoding(file_path):
+    with open(file_path, 'rb') as f:
+        result = chardet.detect(f.read())
+        return result['encoding']
+
+
 # Simplistic command-line driver
 def main(args):
-    with open(args.file, 'r') as data:
+    with open(args.file, 'r', encoding=get_file_encoding(args.file)) as data:
         asn1def = data.read()
 
     parse_tree = parser.parse_asn1(asn1def)
